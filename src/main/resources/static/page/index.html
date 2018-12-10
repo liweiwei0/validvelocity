@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>index</title>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdn.bootcss.com/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://cdn.bootcss.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <script src="../js/auto-line-number.js"></script>
+</head>
+<body>
+    <div style="width: 100%; margin-left: 10px; margin-right: 10px">
+        <div class="form-group" style="float: left; width: 48%; margin-left: 10px; margin-right: 10px">
+            <label for="exampleFormControlTextarea1">volicity模板</label>
+            <textarea class="form-control" id="exampleFormControlTextarea1" rows="10"></textarea>
+        </div>
+        <div class="form-group" style="float: left; width: 48%; margin-left: 10px; margin-right: 10px">
+            <label for="exampleFormControlTextarea2">填充数据(JSON格式)</label>
+            <textarea class="form-control" id="exampleFormControlTextarea2" rows="10"></textarea>
+        </div>
+    </div>
+    <div style="margin-left: 10px; margin-right: 10px;">
+        <div>
+            <input type="button" class="btn btn-outline-secondary" style="margin-left: 1%" onclick="sub()" value="valid">
+            <input type="button" class="btn btn-outline-secondary" style="margin-left: 1%" onclick="cle()" value="clear">
+        </div>
+        <div>
+            <label>验证结果</label>
+            <div style="height: 250px; overflow: auto; display: block">
+                <ul class="list-group list-group-flush" id="msg"></ul>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    $("#exampleFormControlTextarea1").setTextareaCount();
+    $("#exampleFormControlTextarea2").setTextareaCount();
+
+    function sub() {
+        var data1 = document.getElementById('exampleFormControlTextarea1').value;
+        var data2 = document.getElementById('exampleFormControlTextarea2').value;
+        $.ajax({
+            url: "/valid",
+            method: 'POST',
+            data: {
+                data1: data1,
+                data2: data2
+            },
+            success: function(result) {
+                $("#msg").append("<li class='list-group-item'>" + result + "</li>");
+            }
+        });
+    }
+
+    function cle() {
+        var ul = document.getElementById("msg");
+        while(ul.hasChildNodes()) {
+            ul.removeChild(ul.firstChild);
+        }
+    }
+</script>
+</html>

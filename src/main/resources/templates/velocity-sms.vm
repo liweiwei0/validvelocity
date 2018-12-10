@@ -1,0 +1,185 @@
+#if($!{be.totalCarryOverFlux} > 0 || $!{be.residualCountryHalfYearFlux} > 0
+|| ${be.residualLocalHalfYearFlux} > 0 || "$!{be.discountPackageUsedInfos}" != "")
+:@BDSMS@:
+套餐当前使用情况：截至$date.get('MM月dd日HH时mm分')，您：
+#end
+#if($!{be.totalCarryOverFlux} > 0 || $!{be.residualCountryHalfYearFlux} > 0
+|| ${be.residualLocalHalfYearFlux} > 0)
+    #if($!{be.totalCarryOverFlux} > 0)
+        上月结转剩余流量#pkgUnit($!{be.totalCarryOverFlux})，
+        已使用#pkgUnit($!{be.usedCarryOverFlux})，
+        剩余#pkgUnit($!{be.residualCarryOverFlux})。
+        您上月结转剩余流量本月月底前有效。
+    #end
+    #if($!{be.residualCountryHalfYearFlux} > 0 || ${be.residualLocalHalfYearFlux} > 0)
+        #if($!{be.residualCountryHalfYearFlux} > 0)
+            全国流量半年包：
+            已使用#pkgUnit($!{be.usedCountryHalfYearFlux})，剩余#pkgUnit($!{be.residualCountryHalfYearFlux})，
+            有效期至$!date.format("yyyy年MM月dd日",$!{be.countryHalfYearFluxFailedTime})。
+        #end
+        #if(${be.residualLocalHalfYearFlux} > 0)
+            省内流量半年包：
+            已使用#pkgUnit($!{be.usedLocalHalfYearFlux})，剩余#pkgUnit($!{be.residualLocalHalfYearFlux})，
+            有效期至$!date.format("yyyy年MM月dd日",$!{be.localHalfYearFluxFailedTime})。
+        #end
+        此信息不包括您已经使用完毕的流量半年包信息。
+        #if("$!{intent.id}" != "3")
+            点击@WHITESPACE@http://u.10010.cn/tAE3v@WHITESPACE@，随时查看流量使用情况。
+        #end
+    #end
+:@BDSMS@:
+#end
+#if("$!{be.discountPackageUsedInfos}" != "")
+        #foreach($package in $!{be.discountPackageUsedInfos})
+            $!{package.resName}剩余
+            #if("$!{package.resType}" == "SMS")
+                $!number.format("#0",$!{package.residualRes})条
+            #elseif("$!{package.resType}" == "SPEECH")
+                $!number.format("#0",$!{package.residualRes})$!{package.resUnit}
+            #else
+                #pkgUnit($!{package.residualRes})
+            #end
+            #if($velocityCount != $!{be.discountPackageUsedInfos.size()})
+            ，
+            #end
+        #end。
+    #if("$!{intent.id}" != "3")
+        点击@WHITESPACE@http://u.10010.cn/tAE3v@WHITESPACE@，随时查看流量使用情况。
+    #end
+#end
+#if("$!{be.totalCharge}" != "" && "$!{be.payableCharge}" != "")
+:@BDSMS@:
+    #if(${be.arrears})
+        您的账户当前可用余额为#moneySum($!{be.useableBalance})；
+        #if($!{be.realTimeCharge} > 0)
+            实时话费#moneySum($!{be.realTimeCharge})、
+        #end
+        欠费#moneySum($!{be.arrearsAmount})。
+        #if($!{be.callBalance} > 0 ||$!{be.useablePreDeposit} > 0 || $!{be.useableGrants} > 0 ||
+            $!{be.frozenPreDeposit} > 0 ||$!{be.frozenGrants} > 0)
+        :@BDSMS@:
+            #if($!{be.useablePreDeposit} > 0 || $!{be.useableGrants} > 0 || $!{be.frozenPreDeposit} > 0 ||
+                $!{be.frozenGrants} > 0)
+            您的账户余额#moneySum($!{be.callBalance})，其中：
+            #else
+            您的账户余额#moneySum($!{be.callBalance})。
+            #end
+            #if(($!{be.useablePreDeposit} > 0) && ($!{be.useableGrants} > 0 || $!{be.frozenPreDeposit} > 0 ||
+                $!{be.frozenGrants} > 0))
+                可用预存款
+                #if ($!{be.spUseablePreDeposit} > 0)
+                    （专款：#moneySum($!{be.spUseablePreDeposit})）
+                #end
+                #moneySum($!{be.useablePreDeposit})、
+            #elseif(($!{be.useablePreDeposit} > 0) && (!($!{be.useableGrants} > 0 || $!{be.frozenPreDeposit} > 0 ||
+                $!{be.frozenGrants} > 0)))
+                可用预存款
+                #if ($!{be.spUseablePreDeposit} > 0)
+                （专款：#moneySum($!{be.spUseablePreDeposit})）
+                #end
+                #moneySum($!{be.useablePreDeposit})。
+            #end
+            #if(($!{be.useableGrants} > 0) && ($!{be.frozenPreDeposit} > 0 || $!{be.frozenGrants} > 0))
+                可用赠款
+                #if ($!{be.spUseableGrants} > 0)
+                （专款：#moneySum($!{be.spUseableGrants})）
+                #end
+                #moneySum($!{be.useableGrants})、
+            #elseif(($!{be.useableGrants} > 0) && (!($!{be.frozenPreDeposit} > 0 || $!{be.frozenGrants} > 0)))
+                可用赠款
+                #if ($!{be.spUseableGrants} > 0)
+                （专款：#moneySum($!{be.spUseableGrants})）
+                #end
+                #moneySum($!{be.useableGrants})。
+            #end
+            #if(($!{be.frozenPreDeposit} > 0) && ($!{be.frozenGrants} > 0))
+                冻结预存款
+                #if ($!{be.spFrozenPreDeposit} > 0)
+                （专款：#moneySum($!{be.spFrozenPreDeposit})）
+                #end
+                #moneySum($!{be.frozenPreDeposit})、
+            #elseif(($!{be.frozenPreDeposit} > 0) && (!($!{be.frozenGrants} > 0)))
+                冻结预存款
+                #if ($!{be.spFrozenPreDeposit} > 0)
+                （专款：#moneySum($!{be.spFrozenPreDeposit})）
+                #end
+                #moneySum($!{be.frozenPreDeposit})。
+            #end
+            #if($!{be.frozenGrants} > 0)
+                冻结赠款
+                #if ($!{be.spFrozenGrants} > 0)
+                （专款：#moneySum($!{be.spFrozenGrants})）
+                #end
+                #moneySum($!{be.frozenGrants})。
+            #end
+        #end
+    #else
+        您的账户当前可用余额为#moneySum($!{be.useableBalance})
+        #if($!{be.realTimeCharge} > 0)
+            ；实时话费#moneySum($!{be.realTimeCharge})。
+        #else
+            。
+        #end
+        #if($!{be.callBalance} > 0 ||$!{be.useablePreDeposit} > 0 || $!{be.useableGrants} > 0 ||
+            $!{be.frozenPreDeposit} > 0 ||$!{be.frozenGrants} > 0)
+        :@BDSMS@:
+            #if($!{be.useablePreDeposit} > 0 || $!{be.useableGrants} > 0 || $!{be.frozenPreDeposit} > 0 ||
+                $!{be.frozenGrants} > 0)
+            您的账户余额#moneySum($!{be.callBalance})，其中：
+            #else
+            您的账户余额#moneySum($!{be.callBalance})。
+            #end
+            #if(($!{be.useablePreDeposit} > 0) && ($!{be.useableGrants} > 0 || $!{be.frozenPreDeposit} > 0 ||
+                $!{be.frozenGrants} > 0))
+            可用预存款
+                #if ($!{be.spUseablePreDeposit} > 0)
+                （专款：#moneySum($!{be.spUseablePreDeposit})）
+                #end
+                #moneySum($!{be.useablePreDeposit})、
+            #elseif(($!{be.useablePreDeposit} > 0) && (!($!{be.useableGrants} > 0 || $!{be.frozenPreDeposit} > 0 ||
+                $!{be.frozenGrants} > 0)))
+            可用预存款
+                #if ($!{be.spUseablePreDeposit} > 0)
+                （专款：#moneySum($!{be.spUseablePreDeposit})）
+                #end
+                #moneySum($!{be.useablePreDeposit})。
+            #end
+            #if(($!{be.useableGrants} > 0) && ($!{be.frozenPreDeposit} > 0 || $!{be.frozenGrants} > 0))
+            可用赠款
+                #if ($!{be.spUseableGrants} > 0)
+                （专款：#moneySum($!{be.spUseableGrants})）
+                #end
+                #moneySum($!{be.useableGrants})、
+            #elseif(($!{be.useableGrants} > 0) && (!($!{be.frozenPreDeposit} > 0 || $!{be.frozenGrants} > 0)))
+            可用赠款
+                #if ($!{be.spUseableGrants} > 0)
+                （专款：#moneySum($!{be.spUseableGrants})）
+                #end
+                #moneySum($!{be.useableGrants})。
+            #end
+            #if(($!{be.frozenPreDeposit} > 0) && ($!{be.frozenGrants} > 0))
+            冻结预存款
+                #if ($!{be.spFrozenPreDeposit} > 0)
+                （专款：#moneySum($!{be.spFrozenPreDeposit})）
+                #end
+                #moneySum($!{be.frozenPreDeposit})、
+            #elseif(($!{be.frozenPreDeposit} > 0) && (!($!{be.frozenGrants} > 0)))
+            冻结预存款
+                #if ($!{be.spFrozenPreDeposit} > 0)
+                （专款：#moneySum($!{be.spFrozenPreDeposit})）
+                #end
+                #moneySum($!{be.frozenPreDeposit})。
+            #end
+            #if($!{be.frozenGrants} > 0)
+            冻结赠款
+                #if ($!{be.spFrozenGrants} > 0)
+                （专款：#moneySum($!{be.spFrozenGrants})）
+                #end
+                #moneySum($!{be.frozenGrants})。
+            #end
+        #end
+    #end
+#end
+
+
+

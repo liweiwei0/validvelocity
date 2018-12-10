@@ -1,0 +1,226 @@
+#macro(pkgUnit $pkg)
+    #if($!number.toNumber($!pkg)>1024)
+        $!number.format("#0.00", $!math.div($!pkg, "1024"))MB(兆)
+    #else
+        $!number.format("#0.00", $!pkg)KB
+    #end
+#end
+
+#macro(dateConvert $date)
+    #set($dateArray=$date.split("-"))
+    #if ($dateArray.size()==5)
+        $!dateArray[0]年$!dateArray[1]月$!dateArray[2]日$!dateArray[3]时$!dateArray[4]分
+    #elseif ($dateArray.size()==3)
+        $!dateArray[0]年$!dateArray[1]月$!dateArray[2]日
+    #elseif ($dateArray.size()==2)
+        $!dateArray[0]年$!dateArray[1]月
+    #elseif ($dateArray.size()==1)
+        $!dateArray[0]年
+    #end
+#end
+
+#macro(moneySum $money)
+    $!number.format("#0.00",$!math.div($!money, "100"))元
+#end
+
+#macro(addUnit $identify $value)
+    #set($unit = $macro.units.get("$!identify"))
+
+    #if("$!unit" != "")
+        $!{value}$!{unit}
+    #else
+        $!{value}
+    #end
+#end
+
+#macro(mapSynonymy $identify $value)
+    #set($synonymy = $macro.synonymies.get("$!{identify}_$!{value}"))
+    #if("$!synonymy" != "")
+        $!{synonymy}
+    #else
+        $!{value}
+    #end
+#end
+
+#macro (uniqList $list $size)
+    #set ($outputSize = 1)
+    #foreach ($packageName in $list)
+        #if($outputSize < $size)
+            #set ($index = $velocityCount)
+            #foreach ($packageNameBefore in $list)
+                #if($velocityCount < $index && $packageNameBefore == $packageName)
+                    #set ($continue = "continue")
+                #end
+            #end
+            #if ($!{continue} != "continue")
+                #if($outputSize > 1)、#end
+                #if($outputSize == 4)#end
+                $!packageName
+                #set ($outputSize = $outputSize + 1)
+            #end
+        #end
+    #end
+#end
+
+#macro(getBusinessErrorMessage $businessErrorCode)
+    #if ($businessErrorCode == 3000001)
+        您好，您可以通过中国联通手机营业厅客户端退订您的流量包。请问还有什么可以帮您？
+    #elseif ($businessErrorCode == 3000002)
+        好的，经查询，您有可退订的流量包，请您通过手机营业厅退订。请问还有什么可以帮您？
+    #elseif ($businessErrorCode == 2200222)
+        您好，您的套餐信息较多，建议您通过网厅或手厅查看详细信息，请问还有什么可以帮您？
+    #elseif ($businessErrorCode == 3000286)
+        您输入的号码没有绑定宽带，还有什么可以帮您?
+    #elseif ($businessErrorCode == 3000302)
+        好的，经查询，您有可退订的流量包，请您通过手机营业厅退订。请问还有什么可以帮您？
+    #elseif($businessErrorCode == 3000298 || $businessErrorCode == 30014 || $businessErrorCode == 30032
+    || $businessErrorCode == 297)
+        您好，您的账户余额不够支付流量包费用，请您登录手机营业厅缴费及办理流量包，请问还有什么可以帮您？
+    #else
+        #if($macro.businessErrorCodeMap.containsKey($businessErrorCode))
+            #if ($!intent.category == "BIZ_TRANS")
+                您好，因$!macro.businessErrorCodeMap.get($!businessErrorCode)暂时无法办理，请问还有什么可以帮您？
+            #else
+                您好，因$!macro.businessErrorCodeMap.get($!businessErrorCode)暂时无法查询，请问还有什么可以帮您？
+            #end
+        #else
+            #if($!intent.id == 2)
+                您好，您不符合该流量包的办理条件，不能办理哦。请问还有什么可以帮您？
+            #elseif ($!intent.category == "BIZ_TRANS")
+                您好，您的业务没有办理成功，请重新说出您的需求
+            #else
+                您好，本次查询失败，请重新说出您的需求
+            #end
+        #end
+    #end
+#end
+
+
+
+#macro(jointList $list)
+    #set ($listSize = ${list.size()} - 1)
+    #foreach ($packageName in $!{list})
+        $!packageName
+        #if($velocityCount < $listSize)、#end
+        #if($velocityCount == $listSize)和#end
+    #end
+#end
+
+#macro(jointPKGList $list)
+    #set ($listSize = ${list.size()})
+    #foreach ($packageName in $!{list})
+        #if ($listSize > 1)
+            第$velocityCount个是
+        #end
+        $!packageName
+        #if($velocityCount < $listSize)、#end
+    #end
+#end
+
+#macro (filterNAZero $name $valueList $hasJoint)
+    #set ($isEmpty = ($valueList.contains('NA') || $valueList.contains("0")) && $valueList.size() == 1)
+    #if ($!isEmpty == false)
+        $name
+        #set ($valueSize = ${valueList.size()} - 1)
+        #if ($!valueSize > 0)
+        有多个，分别
+        #end
+        #if($hasJoint)
+        是
+        #end
+        #foreach ($value in $!{valueList})
+            #if($!value == 'NA' || $!value == "0")
+            #else
+                $!value
+                #if($velocityCount < ${valueSize})、#end
+                #if($velocityCount ==  ${valueSize})和#end
+            #end
+        #end
+    #else
+        #foreach ($value in $!{valueList})
+            #if($!value == 'NA')
+            不涉及$name，
+            #elseif($!value == "0")
+            没有$name，
+            #end
+        #end
+    #end
+#end
+
+#macro (performAnswer $slotsMap)
+    #set($noValue = true)
+    #foreach ($slotAnswer in $slotsMap.entrySet())
+        #set ($valueList = $slotAnswer.value.value)
+        #set ($isEmpty = ($valueList.contains('NA') || $valueList.contains("0")) && $valueList.size() == 1)
+        #if ($isEmpty == false)
+            #set($noValue = false)
+        #end
+    #end
+    #if ($noValue == false)
+        #foreach ($slotAnswer in $slotsMap.entrySet())
+            #set ($valueList = $slotAnswer.value.value)
+            #if(($valueList.contains('NA') || $valueList.contains("0")) && $valueList.size() == 1)
+            #else
+                #filterNAZero($slotAnswer.value.name, $slotAnswer.value.value, true)
+                #if($velocityCount < ${slotsMap.size()})；#end
+            #end
+        #end
+    #else
+        #foreach ($slotAnswer in $slotsMap.entrySet())
+            #filterNAZero($slotAnswer.value.name, $slotAnswer.value.value, true)
+        #end
+    #end
+#end
+
+#macro (performKGQuery $type $optionValues $slot)
+    #if("$!{slot.slot_myphone.value}" == "本机")
+        #if("$!{optionValues}"=="" || $!{optionValues.size()}==0)
+            好的，经查询，您的号码当前没有${type}，请问还有什么可以帮您？
+        #else
+            #if($!{optionValues.size()} == 1)
+                好的，您已办理的${type}是$!{optionValues.get(0)}，请问您是要咨询它吗？
+            #else
+                好的，您已办理的${type}有$!{optionValues.size()}个，分别是：
+                    #jointList($optionValues)
+                ，请问您想咨询第几个呢？
+            #end
+        #end
+    #else
+        #if("$!{optionValues}"=="" || $!{optionValues.size()}==0)
+        没有查询到符合您需要的信息，请问还有什么可以帮您？
+        #else
+        好的，您咨询的有：
+            #uniqList($!{optionValues}, 6)
+        ，请问您想咨询第几个呢？
+        #end
+    #end
+#end
+
+#macro (getAnswerById $slotsMap $id)
+    #set($noValue = true)
+    #foreach ($slotAnswer in $slotsMap.entrySet())
+        #if ($slotAnswer.value.id == $id)
+            #set($result = $slotAnswer.value.value.get(0))
+            #if("0" != "$result" && "NA" != "$result")
+                $result
+            #end
+        #end
+    #end
+#end
+
+#macro (performAnswerWithoutJoint $slotsMap $nameMap)
+        #foreach ($slotAnswer in $slotsMap.entrySet())
+            #set ($name = $slotAnswer.value.name)
+            #foreach ($nameItem in $nameMap.entrySet())
+                #if("$nameItem.key" == "$slotAnswer.value.id")
+                    #set ($name = $nameItem.value)
+                #end
+            #end
+            #set ($valueList = $slotAnswer.value.value)
+            #if(($valueList.contains('NA') || $valueList.contains("0")) && $valueList.size() == 1)
+            #else
+                #filterNAZero($name, $slotAnswer.value.value, false)
+                #if($velocityCount < ${slotsMap.size()})；#end
+            #end
+        #end
+#end

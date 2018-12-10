@@ -1,0 +1,163 @@
+#macro (generateFluxPackageAnswer $answer $user)
+<div class='table-container'>
+    #if(${answer.getFlowList().size()} > 0)
+    <div class='table-title'>流量情况</div>
+    <table class='eui-table-01'>
+        <thead>
+            <tr>
+                <th>流量包名称</th>
+                <th class='col-sm-20'>流量包剩余</th>
+                <th class='col-sm-20'>流量包有效期</th>
+            </tr>
+        </thead>
+        <tbody>
+            #foreach($res in $answer.getFlowList())
+            <tr>
+                <td>$!{res.name}</td>
+                <td>#pkgUnit($!{res.value})</td>
+                <td>$!{res.validDate}</td>
+            </tr>
+            #end
+        </tbody>
+    </table>
+    #end
+    <div class='table-title'>话费情况</div>
+    <table class='eui-table-01'>
+        <thead>
+            <tr>
+                <th>用户欠费</th>
+                <th>实时话费</th>
+                <th>实时结余</th>
+                <th>信用额度</th>
+                <th>上月话费总额</th>
+                <th>上上月话费总额</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>#moneySum($!{user.arrearsAmount})</td>
+                <td>#moneySum($!{user.realTimeCharge})</td>
+                <td>#moneySum($!{user.callBalance})</td>
+                <td>$!{user.creditLimit}</td>
+                #foreach($historyBill in $answer.historyBills)
+                    <td>#moneySum($!{historyBill.totalAmount})</td>
+                #end
+            </tr>
+        </tbody>
+    </table>
+    <div class='table-title'>套餐情况（$!{user.mainProduct}）</div>
+    <table class='eui-table-01'>
+        <thead>
+            <tr>
+                <th>套餐项</th>
+                <th>套餐余量</th>
+            </tr>
+        </thead>
+        <tbody>
+            #foreach($res in $answer.getPackageList())
+                <tr>
+                    <td>$!{res.name}</td>
+                    #if ($!{res.isFlux()})
+                        <td class='col-sm-30'>#pkgUnit($!{res.value})</td>
+                    #else
+                        <td class='col-sm-30'>$!{res.value}</td>
+                    #end
+                </tr>
+            #end
+        </tbody>
+    </table>
+</div>
+#end
+
+#macro (generateMobileAnswer $answer $user $slot)
+<div class='table-container'>
+    #if(${answer.getFlowList().size()} > 0)
+        <div class='table-title'>流量情况</div>
+        <table class='eui-table-01'>
+            <thead>
+                <tr>
+                    <th>流量包名称</th>
+                    <th class='col-sm-20'>流量包剩余</th>
+                    <th class='col-sm-20'>流量包有效期</th>
+                </tr>
+            </thead>
+            <tbody>
+                #foreach($res in $answer.getFlowList())
+                <tr>
+                    <td>$!{res.name}</td>
+                    <td>#pkgUnit($!{res.value})</td>
+                    <td>$!{res.validDate}</td>
+                </tr>
+                #end
+            </tbody>
+        </table>
+    #end
+    <div class='table-title'>套餐情况（$!{user.mainProduct}）</div>
+    <table class='eui-table-01'>
+        <thead>
+            <tr>
+                <th>套餐项</th>
+                <th class='col-sm-30'>套餐余量</th>
+            </tr>
+        </thead>
+        <tbody>
+            #foreach($res in $answer.getPackageList())
+            <tr>
+                <td>$!{res.name}</td>
+                #if ($!{res.isFlux()})
+                    <td class='col-sm-30'>#pkgUnit($!{res.value})</td>
+                #else
+                    <td class='col-sm-30'>$!{res.value}</td>
+                #end
+            </tr>
+            #end
+        </tbody>
+    </table>
+    <div class='table-title'>历史账单</div>
+    <table class='eui-table-01'>
+        <thead>
+            <tr>
+                <th>月份</th>
+                <th>话费总额</th>
+                <th>固定费</th>
+                <th>语音费</th>
+                <th>增值业务费</th>
+                <th>流量费</th>
+            </tr>
+        </thead>
+        <tbody>
+            #if($answer.historyBillMap)
+                #foreach($entry in $answer.historyBillMap.entrySet())
+                <tr>
+                    <td>$!{entry.key}</td>
+                    <td>#moneySum($!{entry.value.totalAmount})</td>
+                    <td>#if($!{entry.value.monthFixedAmount})#moneySum($!{entry.value.monthFixedAmount})#end</td>
+                    <td>#if($!{entry.value.nameValueMap.get("语音通话费")})#moneySum($!{entry.value.nameValueMap.get("语音通话费")})#end</td>
+                    <td>#if($!{entry.value.nameValueMap.get("增值业务费")})#moneySum($!{entry.value.nameValueMap.get("增值业务费")})#end</td>
+                    <td>#if($!{entry.value.nameValueMap.get("上网费")})#moneySum($!{entry.value.nameValueMap.get("上网费")})#end</td>
+                </tr>
+                #end
+            #end
+        </tbody>
+    </table>
+    #if($!{slot.a_has_contract.value} == "是")
+        <div class='table-title'>合约情况</div>
+        <table class='eui-table-01'>
+            <thead>
+            <tr>
+                <th>合约名称</th>
+                <th class='col-sm-20'>到期时间</th>
+                <th>合约内容</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>$!{slot.a_contract_name.value}</td>
+                <td>$!{slot.a_contract_valid_date.value}</td>
+                <td>$!{answer.contractContent}</td>
+            </tr>
+            </tbody>
+        </table>
+    #end
+</div>
+#end
