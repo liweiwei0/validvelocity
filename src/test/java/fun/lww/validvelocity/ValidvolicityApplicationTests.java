@@ -11,6 +11,7 @@ public class ValidvolicityApplicationTests {
 
     @Test
     public void contextLoads() {
+        System.out.println("a");
     }
 
 }
