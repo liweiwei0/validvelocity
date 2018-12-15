@@ -104,19 +104,19 @@ public class ValidController {
                 List<Object> list1 = new ArrayList<>();
                 while(it.hasNext()){
                     Object json2 = it.next();
-                    if (isJson(json2.toString())) {
-                        list.add(parseJSON2Map(json2.toString(), code));
+                    if (isJson(String.valueOf(json2))) {
+                        list.add(parseJSON2Map(String.valueOf(json2), code));
                     } else {
-                        list1.add(json2.toString());
+                        list1.add(String.valueOf(json2));
                     }
                 }
                 if (!list.isEmpty()) {
-                    map.put(k.toString(), list);
+                    map.put(String.valueOf(k), list);
                 } else if (!list1.isEmpty()) {
-                    map.put(k.toString(), list1);
+                    map.put(String.valueOf(k), list1);
                 }
             } else {
-                map.put(k.toString(), v);
+                map.put(String.valueOf(k), v);
             }
         }
         return map;
