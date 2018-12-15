@@ -6,6 +6,23 @@
     #end
 #end
 
+#macro(pkgUnit1 $pkg)
+    #set($pkgNum = $!number.toNumber($!pkg))
+    #if($!math.div($pkgNum, "1024") < 1)
+        $!number.format("#0.00", $pkgNum)MB
+    #else
+        #if($!math.div($pkgNum, "1048576") < 1)
+            $!number.format("#0.00", $!math.div($pkgNum, "1024"))GB
+        #else
+            #if($!math.div($pkgNum, "1073741824") < 1)
+                $!number.format("#0.00", $!math.div($pkgNum, "1048576"))TB
+            #else
+                $!number.format("#0.00", $pkgNum)MB;
+            #end
+        #end
+    #end
+#end
+
 #macro(dateConvert $date)
     #set($dateArray=$date.split("-"))
     #if ($dateArray.size()==5)

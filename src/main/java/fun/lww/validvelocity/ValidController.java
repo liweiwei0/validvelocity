@@ -39,7 +39,8 @@ public class ValidController {
         }
 
         Properties properties = new Properties();
-        properties.setProperty(RuntimeConstants.VM_LIBRARY, "templates/velocity-macro.vm");
+        properties.setProperty(RuntimeConstants.VM_LIBRARY, "templates/velocity-macro.vm,templates/assistant-table" +
+                ".vm,templates/velocity-sms.vm");
         properties.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
         properties.setProperty("classpath.resource.loader.class", "org.apache.velocity.runtime.resource.loader"
                 + ".ClasspathResourceLoader");
