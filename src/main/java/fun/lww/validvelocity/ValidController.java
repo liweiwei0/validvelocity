@@ -1,6 +1,7 @@
 package fun.lww.validvelocity;
 
 import net.sf.json.JSONArray;
+import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.velocity.app.VelocityEngine;
@@ -55,7 +56,11 @@ public class ValidController {
         toolManager.configure(ConfigurationUtils.getGenericTools());
 
         ToolContext context = toolManager.createContext();
-        Map<String, Object> map = parseJSON2Map(data2);
+        String code = UUID.randomUUID().toString();
+        Map<String, Object> map = parseJSON2Map(data2, code);
+        if (map.keySet().contains("err:code=" + code)) {
+            return String.valueOf(map.get("err:code=" + code));
+        }
         map.forEach(context::put);
 
         StringWriter writer = new StringWriter();
@@ -72,7 +77,7 @@ public class ValidController {
      * @param jsonStr
      * @return
      */
-    private static Map<String, Object> parseJSON2Map(String jsonStr){
+    private static Map<String, Object> parseJSON2Map(String jsonStr, String code){
         log.info("data: {}", jsonStr);
         Map<String, Object> map = new HashMap<>();
         if (StringUtils.isBlank(jsonStr)) {
@@ -80,7 +85,17 @@ public class ValidController {
         }
         jsonStr = jsonStr.replaceAll("\r", "").replaceAll("\n", "")
                 .replaceAll("\t", "");
-        JSONObject json = JSONObject.fromObject(jsonStr);
+        JSONObject json = null;
+        try {
+            json = JSONObject.fromObject(jsonStr);
+        } catch (JSONException e) {
+            map.put("err:code=" + code, "数据格式异常: " + e.getMessage());
+            return map;
+        }
+        if (json == null) {
+            map.put("err:code=" + code, "数据解析失败");
+            return map;
+        }
         for(Object k : json.keySet()){
             Object v = json.get(k);
             if(v instanceof JSONArray){
@@ -90,7 +105,7 @@ public class ValidController {
                 while(it.hasNext()){
                     Object json2 = it.next();
                     if (isJson(json2.toString())) {
-                        list.add(parseJSON2Map(json2.toString()));
+                        list.add(parseJSON2Map(json2.toString(), code));
                     } else {
                         list1.add(json2.toString());
                     }
